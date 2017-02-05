@@ -5,20 +5,23 @@ import * as path from 'path';
 
 let url = 'mongodb://localhost:27017/emi';
 
-let imageDir = '/data/upload-img';
+let imageDir = 'c:\\data\\upload-img';
+let emiDir = '../emi/dist'
 
 
 export function run() {
 	let app = express();
 	let db: Db;
 
-	app.use(formidable({
+	app.use('/api', formidable({
 		encoding: 'utf-8',
 		uploadDir: imageDir,
 		multiples: false,
 		keepExtensions: true
 	}));
 
+
+	app.use('/', express.static(emiDir));
 	app.use('/upload/images/', express.static(imageDir));
 
 	app.post('/api/card', (req, res) => {
@@ -44,7 +47,7 @@ export function run() {
 		} else {
 			'Connected to database';
 			db = database;
-			app.listen(3000, () => {
+			app.listen(80, () => {
 				'Server is running';
 			})
 		}
