@@ -41,10 +41,21 @@ export function run() {
 	});
 
 	app.get('/api/card', (req, res) => {
+		if (req.hostname !== "localhost") {
+			res.send(401);
+			return;
+		}
 		return db.collection('cards').find().toArray().then((value) => {
 			res.type('application/json');
 			res.json(value);
 		});
+	});
+
+	app.get('api/card/count', (req, res) => {
+		return db.collection('cards').count({}).then((value) => {
+			res.type('application/json');
+			res.json({ cardCount: value });
+		})
 	});
 
 	MongoClient.connect(url, (error, database) => {
@@ -54,8 +65,8 @@ export function run() {
 		} else {
 			console.log('Connected to database');
 			db = database;
-			app.listen(3000, () => {
-				'Server is running';
+			app.listen(80, () => {
+				console.log('Server is running');
 			})
 		}
 	});
