@@ -22,7 +22,7 @@ export function run() {
 
 
 	app.use('/', express.static(emiDir));
-	app.use('/upload/images/', express.static(imageDir));
+	app.use('/api/images/', express.static(imageDir));
 
 	app.post('/api/card', (req, res) => {
 		var files = req['files'];
@@ -40,14 +40,21 @@ export function run() {
 
 	});
 
+	app.get('/api/card', (req, res) => {
+		return db.collection('cards').find().toArray().then((value) => {
+			res.type('application/json');
+			res.json(value);
+		});
+	});
+
 	MongoClient.connect(url, (error, database) => {
 		if (error) {
 			console.error(error);
 			return;
 		} else {
-			'Connected to database';
+			console.log('Connected to database');
 			db = database;
-			app.listen(80, () => {
+			app.listen(3000, () => {
 				'Server is running';
 			})
 		}
