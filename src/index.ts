@@ -40,10 +40,29 @@ export function run() {
 
 	});
 
-	app.get('/api/card/count', (req, res) => {
-		return db.collection('cards').count({}).then((value) => {
+	app.post('/api/print', (req, res) => {
+		var print = req['fields'];
+		if(print) {
+			db.collection('print').insert(print);
+			res.end(JSON.stringify({
+				message: 'Print Recorded'
+			}));
+		} else {
+			res.end(400);
+		}
+	});
+
+
+	app.get('/api/stats', (req, res) => {
+		return Promise.all([
+			db.collection('cards').count({}),
+			db.collection('print').count({})
+		]).then((value) => {
 			res.type('application/json');
-			res.json({ cardCount: value });
+			res.json({
+				cardCount: value[0],
+				printCount: value[1]
+			});
 		})
 	});
 
@@ -58,6 +77,17 @@ export function run() {
 		});
 	});
 
+	app.get('/api/print', (req, res) => {
+		if (req.hostname !== "localhost") {
+			res.send(401);
+			return;
+		}
+		return db.collection('print').find().toArray().then((value) => {
+			res.type('application/json');
+			res.json(value);
+		});
+	});
+
 	MongoClient.connect(url, (error, database) => {
 		if (error) {
 			console.error(error);
@@ -65,6 +95,7 @@ export function run() {
 		} else {
 			console.log('Connected to database');
 			db = database;
+
 			app.listen(3000, () => {
 				console.log('Server is running');
 			})
