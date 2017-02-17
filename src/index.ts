@@ -40,6 +40,13 @@ export function run() {
 
 	});
 
+	app.get('/api/card/count', (req, res) => {
+		return db.collection('cards').count({}).then((value) => {
+			res.type('application/json');
+			res.json({ cardCount: value });
+		})
+	});
+
 	app.get('/api/card', (req, res) => {
 		if (req.hostname !== "localhost") {
 			res.send(401);
@@ -51,13 +58,6 @@ export function run() {
 		});
 	});
 
-	app.get('api/card/count', (req, res) => {
-		return db.collection('cards').count({}).then((value) => {
-			res.type('application/json');
-			res.json({ cardCount: value });
-		})
-	});
-
 	MongoClient.connect(url, (error, database) => {
 		if (error) {
 			console.error(error);
@@ -65,7 +65,7 @@ export function run() {
 		} else {
 			console.log('Connected to database');
 			db = database;
-			app.listen(80, () => {
+			app.listen(3000, () => {
 				console.log('Server is running');
 			})
 		}
