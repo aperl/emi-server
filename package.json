@@ -10,9 +10,11 @@
   "author": "Allen Perl",
   "license": "ISC",
   "dependencies": {
+    "@types/serve-static": "^1.7.31",
     "express": "^4.14.1",
     "express-formidable": "^1.0.0",
-    "mongodb": "^2.2.22"
+    "mongodb": "^2.2.22",
+    "serve-static": "^1.11.2"
   },
   "devDependencies": {
     "@types/express": "^4.0.35",

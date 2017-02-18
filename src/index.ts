@@ -1,12 +1,19 @@
 import { MongoClient, Db } from 'mongodb';
+import * as events from 'events';
 import * as express from 'express';
 import formidable = require('express-formidable');
 import * as path from 'path';
+import * as serveStatic from 'serve-static';
 
 let url = 'mongodb://localhost:27017/emi';
 
 let imageDir = 'c:\\data\\upload-img';
-let emiDir = '../emi/dist'
+let emiDir = '../emi/dist' 
+
+events.EventEmitter.prototype['maxListeners'] = 0;
+
+
+process.setMaxListeners(0);
 
 
 export function run() {
@@ -21,8 +28,7 @@ export function run() {
 	}));
 
 
-	app.use('/', express.static(emiDir));
-	app.use('/api/images/', express.static(imageDir));
+	app.use('/images/', serveStatic(imageDir));
 
 	app.post('/api/card', (req, res) => {
 		var files = req['files'];
@@ -88,6 +94,8 @@ export function run() {
 		});
 	});
 
+	app.use('/', serveStatic(emiDir));
+
 	MongoClient.connect(url, (error, database) => {
 		if (error) {
 			console.error(error);
@@ -96,7 +104,7 @@ export function run() {
 			console.log('Connected to database');
 			db = database;
 
-			app.listen(3000, () => {
+			app.listen(80, () => {
 				console.log('Server is running');
 			})
 		}
