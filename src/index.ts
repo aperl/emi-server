@@ -15,6 +15,10 @@ events.EventEmitter.prototype['maxListeners'] = 0;
 
 process.setMaxListeners(0);
 
+function localNetwork(req: express.Request) {
+	return req.hostname === '192.168.0.100' || req.hostname === 'localhost';
+}
+
 
 export function run() {
 	let app = express();
@@ -43,7 +47,7 @@ export function run() {
 	});
 
 	app.put('/api/card', (req, res) => {
-		if (req.hostname !== "localhost") {
+		if (!localNetwork(req)) {
 			res.sendStatus(401);
 			return;
 		}
@@ -82,7 +86,7 @@ export function run() {
 	});
 
 	app.get('/api/card', (req, res) => {
-		if (req.hostname !== "localhost") {
+		if (!localNetwork(req)) {
 			res.sendStatus(401);
 			return;
 		}
@@ -99,7 +103,7 @@ export function run() {
 	});
 
 	app.get('/api/print', (req, res) => {
-		if (req.hostname !== "localhost") {
+		if (!localNetwork(req)) {
 			res.sendStatus(401);
 			return;
 		}
