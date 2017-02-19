@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, ObjectID } from 'mongodb';
 import * as events from 'events';
 import * as express from 'express';
 import formidable = require('express-formidable');
@@ -39,22 +39,31 @@ export function run() {
 			card.image = path.basename(files.image.path);
 		}
 		db.collection('cards').insert(card);
-		res.writeHead(200, { 'content-type': 'application/json'});
-		res.end(JSON.stringify({
-			message: 'Data Uploaded'
-		}));
+		res.sendStatus(201);
+	});
 
+	app.put('/api/card', (req, res) => {
+		if (req.hostname !== "localhost") {
+			res.sendStatus(401);
+			return;
+		}
+
+		var fields = req['fields'];
+		var updates = JSON.parse(fields.update) as any[];
+
+		for(let update of updates) {
+			db.collection('cards').update({ _id: new ObjectID(update.id)}, update.data);
+		}
+		res.sendStatus(202);
 	});
 
 	app.post('/api/print', (req, res) => {
 		var print = req['fields'];
 		if(print) {
 			db.collection('print').insert(print);
-			res.end(JSON.stringify({
-				message: 'Print Recorded'
-			}));
+			res.sendStatus(201);
 		} else {
-			res.end(400);
+			res.sendStatus(400);
 		}
 	});
 
@@ -74,10 +83,16 @@ export function run() {
 
 	app.get('/api/card', (req, res) => {
 		if (req.hostname !== "localhost") {
-			res.send(401);
+			res.sendStatus(401);
 			return;
 		}
-		return db.collection('cards').find().toArray().then((value) => {
+
+		let filter = {};
+		if (req.query.filter) {
+			filter = JSON.parse(req.query.filter);
+		}
+
+		return db.collection('cards').find(filter).toArray().then((value) => {
 			res.type('application/json');
 			res.json(value);
 		});
@@ -85,7 +100,7 @@ export function run() {
 
 	app.get('/api/print', (req, res) => {
 		if (req.hostname !== "localhost") {
-			res.send(401);
+			res.sendStatus(401);
 			return;
 		}
 		return db.collection('print').find().toArray().then((value) => {
